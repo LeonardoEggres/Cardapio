@@ -1,0 +1,17 @@
+<?php
+
+namespace DummyNamespace;
+
+class DummyClass
+{
+    public function __construct()
+    {
+        // Injeção de dependências aqui (ex: Model)
+    }
+
+    // Exemplo de método
+    public function exampleMethod()
+    {
+        // Lógica do service
+    }
+}
