@@ -42,8 +42,8 @@ class Menu extends Model
     /**
      * Obtenha os itens de menu para este menu.
      */
-    public function items(): HasMany
+    public function menu_items(): HasMany
     {
-        return $this->hasMany(MenuItem::class);
+        return $this->hasMany(MenuItem::class, 'menu_id');
     }
 }

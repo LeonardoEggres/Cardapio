@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMenusRequest;
 use App\Http\Requests\UpdateMenusRequest;
+use App\Models\Menu;
 use App\Services\MenuService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -24,7 +25,7 @@ class MenusController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $menus = $this->menuService->index();
+            $menus = Menu::with('menu_items')->get(); // <-- aqui o ajuste
             return response()->json($menus, 200);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
