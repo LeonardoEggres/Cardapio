@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo; // Importar para relações
 
-class Visualization_preference extends Model
+class VisualizationPreference extends Model
 {
     /** @use HasFactory<\Database\Factories\VisualizationPreferenceFactory> */
     use HasFactory;

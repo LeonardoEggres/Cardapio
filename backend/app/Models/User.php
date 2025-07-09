@@ -61,6 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function visualizationPreferences(): HasMany
     {
-        return $this->hasMany(Visualization_preference::class);
+        return $this->hasMany(VisualizationPreference::class);
     }
 }
