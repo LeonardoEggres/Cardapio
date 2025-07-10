@@ -2,97 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreMenusRequest;
-use App\Http\Requests\UpdateMenusRequest;
 use App\Models\Menu;
-use App\Services\MenuService;
-use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\JsonResponse; // Adicionado para type-hinting
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MenusController extends Controller
 {
-    protected $menuService;
-
-    public function __construct(MenuService $menuService)
+    public function index()
     {
-        $this->menuService = $menuService;
+        $menus = Menu::with('menu_items')->orderBy('date', 'desc')->get();
+        return response()->json($menus);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
+    public function store(Request $request)
     {
-        try {
-            $menus = Menu::with('menu_items')->get(); // <-- aqui o ajuste
-            return response()->json($menus, 200);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
+        $validated = $request->validate([
+            'date' => ['required', 'date', Rule::unique('menus', 'date')],
+        ]);
+
+        $menu = new Menu();
+        $menu->date = $validated['date'];
+        $menu->created_by = $request->user()->id;
+        $menu->save();
+
+        return response()->json(['data' => $menu], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMenusRequest $request): JsonResponse
+    public function show(Menu $menu)
     {
-        try {
-            $menu = $this->menuService->store($request->validated());
-            return response()->json([
-                'message' => 'Cardápio cadastrado com sucesso!',
-                'data' => $menu
-            ], 201); // 201 Created
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
+        $menu->load('menu_items', 'creator');
+        return response()->json($menu);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id): JsonResponse
+    public function update(Request $request, Menu $menu)
     {
-        try {
-            $menu = $this->menuService->show($id);
-            return response()->json($menu, 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Cardápio não encontrado.'], 404);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+        $validated = $request->validate([
+            'date' => ['sometimes', 'date', Rule::unique('menus', 'date')->ignore($menu->id)],
+        ]);
+
+        if (isset($validated['date'])) {
+            $menu->date = $validated['date'];
         }
+        $menu->save();
+
+        return response()->json(['data' => $menu]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMenusRequest $request, $id): JsonResponse
+    public function destroy(Menu $menu)
     {
-        try {
-            $menu = $this->menuService->update($request->validated(), $id);
-            return response()->json([
-                'message' => 'Cardápio atualizado com sucesso!',
-                'data' => $menu
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Cardápio não encontrado para atualização.'], 404);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
-    }
+        $menu->menu_items()->delete();
+        $menu->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id): JsonResponse
-    {
-        try {
-            $this->menuService->destroy($id);
-            return response()->json(['message' => 'Cardápio excluído com sucesso!'], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Cardápio não encontrado para exclusão.'], 404);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
+        return response()->json(['message' => 'Menu apagado com sucesso.']);
     }
 }

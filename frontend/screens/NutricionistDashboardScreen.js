@@ -1,3 +1,4 @@
+// frontend/screens/NutricionistDashboardScreen.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -6,8 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
-  ScrollView
+  Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
@@ -17,6 +17,7 @@ export default function NutricionistDashboardScreen() {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState(null);
+  const [creatingNew, setCreatingNew] = useState(false);
 
   const fetchMenus = async () => {
     try {
@@ -42,16 +43,45 @@ export default function NutricionistDashboardScreen() {
 
   const handleEdit = (menu) => {
     setSelectedMenu(menu);
+    setCreatingNew(false);
+  };
+
+  const handleDelete = async (menuId) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await api.delete(`/menus/${menuId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      Alert.alert('Sucesso', 'Cardápio apagado.');
+      fetchMenus();
+    } catch (error) {
+      console.error('Erro ao apagar cardápio:', error);
+      Alert.alert('Erro', 'Não foi possível apagar o cardápio.');
+    }
   };
 
   const handleSaved = () => {
     setSelectedMenu(null);
+    setCreatingNew(false);
     fetchMenus();
+  };
+
+  const handleCancel = () => {
+    setSelectedMenu(null);
+    setCreatingNew(false);
+  };
+
+  // Função para formatar data no formato DD/MM evitando problema de timezone
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const dateOnly = dateString.slice(0, 10); // "YYYY-MM-DD"
+    const [year, month, day] = dateOnly.split('-');
+    return `${day}/${month}`;
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.menuItem} onPress={() => handleEdit(item)}>
-      <Text style={styles.menuDate}>📅 Data: {item.date}</Text>
+      <Text style={styles.menuDate}>📅 Data: {formatDate(item.date)}</Text>
       <View style={styles.menuItemList}>
         {item.menu_items && item.menu_items.length > 0 ? (
           item.menu_items.map((menuItem, index) => (
@@ -63,16 +93,26 @@ export default function NutricionistDashboardScreen() {
           <Text style={styles.menuText}>Sem itens cadastrados.</Text>
         )}
       </View>
+      <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+        <Text style={styles.deleteText}>🗑️ Apagar</Text>
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      {selectedMenu ? (
-        <MenuForm menu={selectedMenu} onSaved={handleSaved} />
+      {selectedMenu || creatingNew ? (
+        <MenuForm
+          menu={selectedMenu || null}
+          onSaved={handleSaved}
+          onCancel={handleCancel}
+        />
       ) : (
         <>
           <Text style={styles.title}>Cardápios Criados</Text>
+          <TouchableOpacity style={styles.newButton} onPress={() => setCreatingNew(true)}>
+            <Text style={styles.newButtonText}>+ Novo Cardápio</Text>
+          </TouchableOpacity>
           {loading ? (
             <ActivityIndicator size="large" color="#0d6efd" />
           ) : (
@@ -120,5 +160,26 @@ const styles = StyleSheet.create({
   },
   menuItemList: {
     marginTop: 5
+  },
+  newButton: {
+    backgroundColor: '#198754',
+    padding: 12,
+    borderRadius: 5,
+    marginBottom: 20
+  },
+  newButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold'
+  },
+  deleteButton: {
+    marginTop: 10,
+    backgroundColor: '#dc3545',
+    padding: 8,
+    borderRadius: 5
+  },
+  deleteText: {
+    color: '#fff',
+    textAlign: 'center'
   }
 });

@@ -47,9 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/menu-items', [MenuItemsController::class, 'index']);
     Route::post('/menu-items', [MenuItemsController::class, 'store']);
-    Route::get('/menu-items/{menu_item}', [MenuItemsController::class, 'show']);
-    Route::put('/menu-items/{menu_item}', [MenuItemsController::class, 'update']);
-    Route::delete('/menu-items/{menu_item}', [MenuItemsController::class, 'destroy']);
+    Route::post('/menu-items{menuItem}', [MenuItemsController::class, 'show']);
+    Route::put('/menu-items/{menuItem}', [MenuItemsController::class, 'update']);
+    Route::delete('/menu-items/{menuItem}', [MenuItemsController::class, 'destroy']);
 
     Route::get('/visualization-preferences', [VisualizationPreferencesController::class, 'index']);
     Route::post('/visualization-preferences', [VisualizationPreferencesController::class, 'store']);
@@ -57,5 +57,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/visualization-preferences/{visualization_preference}', [VisualizationPreferencesController::class, 'update']);
     Route::delete('/visualization-preferences/{visualization_preference}', [VisualizationPreferencesController::class, 'destroy']);
     Route::get('/menus/day/{userId}/{date?}', [VisualizationPreferencesController::class, 'menuByDay']);
-    Route::get('/menus/week/{userId}/{startDate?}', [VisualizationPreferencesController::class, 'menuByWeek']); 
+    Route::get('/menus/week/{userId}/{startDate?}', [VisualizationPreferencesController::class, 'menuByWeek']);
 });

@@ -1,86 +1,195 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Modal, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
-export default function MenuForm({ menu, onClose }) {
+export default function MenuForm({ menu, onSaved, onCancel }) {
   const [date, setDate] = useState('');
-  const [description, setDescription] = useState('');
+  const [menuItems, setMenuItems] = useState([]);
 
   useEffect(() => {
     if (menu) {
-      setDate(menu.date);
-      setDescription(menu.description);
+      setDate(menu.date ? new Date(menu.date).toLocaleDateString('pt-BR') : '');
+      setMenuItems(menu.menu_items || []);
     } else {
       setDate('');
-      setDescription('');
+      setMenuItems([
+        { type: 'café', description: '' },
+        { type: 'almoço', description: '' },
+        { type: 'janta', description: '' }
+      ]);
     }
   }, [menu]);
 
-  const handleSave = async () => {
-    if (!date || !description) {
-      Alert.alert('Erro', 'Preencha todos os campos.');
-      return;
-    }
+  const handleChange = (index, field, value) => {
+    const updatedItems = [...menuItems];
+    updatedItems[index][field] = value;
+    setMenuItems(updatedItems);
+  };
+
+  const handleSubmit = async () => {
+    const token = await AsyncStorage.getItem('token');
 
     try {
-      const token = await AsyncStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      if (menu) {
-        await api.put(`/menus/${menu.id}`, { date, description }, config);
-        Alert.alert('Sucesso', 'Cardápio atualizado.');
+      let menuId;
+
+      if (menu?.id) {
+        // Atualizar menu existente
+        await api.put(`/menus/${menu.id}`, {
+          date: formatDateToISO(date)
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        menuId = menu.id;
+
+        // Atualizar ou criar itens do menu
+        for (const item of menuItems) {
+          if (item.id) {
+            await api.put(`/menu-items/${item.id}`, item, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          } else {
+            await api.post('/menu-items', {
+              menu_id: menuId,
+              ...item
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          }
+        }
+
+        Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
       } else {
-        await api.post('/menus', { date, description }, config);
-        Alert.alert('Sucesso', 'Cardápio criado.');
+        // Criar novo menu
+        const newMenuResponse = await api.post('/menus', {
+          date: formatDateToISO(date)
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        menuId = newMenuResponse.data.data.id;
+
+        // Criar itens do menu
+        for (const item of menuItems) {
+          await api.post('/menu-items', {
+            menu_id: menuId,
+            ...item
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+
+        Alert.alert('Sucesso', 'Cardápio criado com sucesso!');
       }
-      onClose();
+
+      onSaved();
     } catch (error) {
+      console.error(error);
       Alert.alert('Erro', 'Não foi possível salvar o cardápio.');
     }
   };
 
+  // Função para converter data do formato DD/MM/AAAA para AAAA-MM-DD (ISO)
+  function formatDateToISO(dateStr) {
+    const [day, month, year] = dateStr.split('/');
+    if (!day || !month || !year) return null;
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
   return (
-    <Modal visible={true} animationType="slide" transparent={true}>
-      <View style={styles.modalBackground}>
-        <View style={styles.container}>
-          <Text style={styles.title}>{menu ? 'Editar Cardápio' : 'Novo Cardápio'}</Text>
-          <TextInput
-            placeholder="Data (YYYY-MM-DD)"
-            value={date}
-            onChangeText={setDate}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Descrição"
-            value={description}
-            onChangeText={setDescription}
-            style={[styles.input, { height: 100 }]}
-            multiline
-          />
-          <View style={styles.buttons}>
-            <Button title="Salvar" onPress={handleSave} />
-            <Button title="Cancelar" color="red" onPress={onClose} />
-          </View>
-        </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {menu?.id ? 'Editar Cardápio' : 'Novo Cardápio'}
+      </Text>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Data do Cardápio</Text>
+        <TextInput
+          style={styles.input}
+          value={date}
+          onChangeText={setDate}
+          placeholder="DD/MM/AAAA"
+          placeholderTextColor="#999"
+          keyboardType="numeric"
+        />
       </View>
-    </Modal>
+
+      {menuItems.map((item, index) => (
+        <View key={index} style={styles.inputGroup}>
+          <Text style={styles.label}>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</Text>
+          <TextInput
+            style={styles.input}
+            value={item.description}
+            onChangeText={(text) => handleChange(index, 'description', text)}
+            placeholder={`Descrição para ${item.type}`}
+            placeholderTextColor="#999"
+          />
+        </View>
+      ))}
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Salvar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+        <Text style={styles.cancelText}>Cancelar</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'
-  },
   container: {
-    backgroundColor: '#fff', margin: 20, borderRadius: 10, padding: 20
+    padding: 20,
+    backgroundColor: '#fff',
+    flex: 1
   },
   title: {
-    fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center'
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20
+  },
+  inputGroup: {
+    marginBottom: 15
+  },
+  label: {
+    fontWeight: 'bold',
+    marginBottom: 5
   },
   input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, marginBottom: 15
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    color: '#000'
   },
-  buttons: {
-    flexDirection: 'row', justifyContent: 'space-around'
+  button: {
+    backgroundColor: '#0d6efd',
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 20
+  },
+  buttonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold'
+  },
+  cancelButton: {
+    marginTop: 10,
+    padding: 15
+  },
+  cancelText: {
+    color: '#dc3545',
+    textAlign: 'center',
+    fontWeight: 'bold'
   }
 });
