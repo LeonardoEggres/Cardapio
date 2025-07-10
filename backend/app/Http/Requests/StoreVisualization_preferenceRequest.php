@@ -1,4 +1,3 @@
-// app/Http/Requests/StoreVisualization_preferenceRequest.php
 <?php
 
 namespace App\Http\Requests;

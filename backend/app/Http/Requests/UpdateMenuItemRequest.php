@@ -1,4 +1,3 @@
-// app/Http/Requests/UpdateMenuItemRequest.php
 <?php
 
 namespace App\Http\Requests;

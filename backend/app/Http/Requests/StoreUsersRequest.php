@@ -1,4 +1,3 @@
-// app/Http/Requests/StoreUsersRequest.php
 <?php
 
 namespace App\Http\Requests;

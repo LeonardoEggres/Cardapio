@@ -12,7 +12,7 @@ class MenuService
     public function index()
     {
         try {
-            return Menu::with('items')->get(); // Retorna a coleção de Models diretamente
+            return Menu::with('menu_items')->get(); // Retorna a coleção de Models diretamente
         } catch (Exception $e) {
             // Lança uma exceção genérica para ser tratada no Controller
             throw new Exception("Ocorreu um erro ao retornar os cardápios: " . $e->getMessage());

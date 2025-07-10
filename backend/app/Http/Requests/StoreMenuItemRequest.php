@@ -1,4 +1,3 @@
-// app/Http/Requests/StoreMenuItemRequest.php
 <?php
 
 namespace App\Http\Requests;

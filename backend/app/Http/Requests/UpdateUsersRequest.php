@@ -1,4 +1,3 @@
-// app/Http/Requests/UpdateUsersRequest.php
 <?php
 
 namespace App\Http\Requests;

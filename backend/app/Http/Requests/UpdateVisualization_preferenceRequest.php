@@ -1,4 +1,3 @@
-// app/Http/Requests/UpdateVisualization_preferenceRequest.php
 <?php
 
 namespace App\Http\Requests;
