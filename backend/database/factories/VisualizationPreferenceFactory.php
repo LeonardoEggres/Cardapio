@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MenuItemFactory extends Factory
+class VisualizationPreferenceFactory extends Factory
 {
     public function definition(): array
     {

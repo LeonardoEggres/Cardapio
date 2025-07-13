@@ -11,7 +11,6 @@ class StoreMenuItemRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Apenas nutricionistas podem criar itens de cardápio
         return $this->user()->role === 'nutricionist';
     }
 

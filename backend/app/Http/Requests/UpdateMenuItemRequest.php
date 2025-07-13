@@ -11,7 +11,6 @@ class UpdateMenuItemRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Apenas nutricionistas podem atualizar itens de cardápio
         return $this->user()->role === 'nutricionist';
     }
 

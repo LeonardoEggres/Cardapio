@@ -12,11 +12,11 @@ class MakeServiceCommand extends GeneratorCommand
 
     protected function getStub()
     {
-        return __DIR__ . '/stubs/service.stub'; // Caminho para o template
+        return __DIR__ . '/stubs/service.stub';
     }
 
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace . '\Services'; // Pasta de destino
+        return $rootNamespace . '\Services'; 
     }
 }

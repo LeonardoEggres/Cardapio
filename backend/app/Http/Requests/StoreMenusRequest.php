@@ -11,7 +11,6 @@ class StoreMenusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Apenas nutricionistas podem criar cardápios
         return $this->user()->role === 'nutricionist';
     }
 
@@ -24,7 +23,6 @@ class StoreMenusRequest extends FormRequest
     {
         return [
             'date' => 'required|date|unique:menus,date',
-            // Adicione outras regras para os campos do menu, se houver
         ];
     }
 

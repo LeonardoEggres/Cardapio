@@ -12,20 +12,12 @@ class UpdateUsersRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Apenas o próprio usuário ou um administrador pode atualizar o usuário.
-        // Assumindo que a rota passa o ID do usuário como 'user'.
-        // Ou o usuário logado está atualizando a si mesmo.
         return $this->user()->id == $this->route('user') || $this->user()->role === 'admin'; // Adapte sua lógica de role
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+
     public function rules(): array
     {
-        // Pega o ID do usuário da rota para ignorar na validação unique do email.
         $userId = $this->route('user');
 
         return [
@@ -38,7 +30,7 @@ class UpdateUsersRequest extends FormRequest
                 Rule::unique('users')->ignore($userId),
             ],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'sometimes|in:student,nutricionist', // Apenas admin pode mudar o role
+            'role' => 'sometimes|in:student,nutricionist', 
         ];
     }
 

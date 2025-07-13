@@ -12,31 +12,20 @@ class UpdateVisualization_preferenceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // O usuário autenticado pode atualizar sua própria preferência de visualização.
-        // Ou um administrador pode atualizar para outro usuário.
-        // Pega a preferência de visualização pelo ID da rota para verificar o user_id associado.
-        $preference = $this->route('visualization_preference'); // Assume que o parâmetro de rota é 'visualization_preference'
-
-        return $this->user()->id == $preference->user_id || $this->user()->role === 'admin';
+        $preference = $this->route('visualization_preference');
+        return $this->user()->id == $preference->user_id || $this->user()->role === 'admin' || $this->user()->role === 'student';
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'user_id' => 'sometimes|exists:users,id',
-            'view_type' => 'sometimes|in:day,week',
+            'view_type' => 'required|in:day,week',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'user_id.exists' => 'O usuário especificado não existe.',
             'view_type.in' => 'O tipo de visualização deve ser "day" ou "week".',
         ];
     }
