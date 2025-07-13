@@ -47,10 +47,12 @@ class VisualizationPreferenceService
 
     public function update(array $data, $id)
     {
+        dd($data); // <--- ADICIONE ESTA LINHA
         DB::beginTransaction();
         try {
             $preference = VisualizationPreference::findOrFail($id);
             $preference->update([
+                'user_id' => $data['user_id'],
                 'view_type' => $data['view_type'],
             ]);
             DB::commit();

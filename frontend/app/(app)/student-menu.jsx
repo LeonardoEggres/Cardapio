@@ -33,82 +33,82 @@ export default function StudentMenuScreen() {
         if (!user?.id) return;
         
         try {
-            const response = await apiClient.get(`/visualization-preferences?user_id=${user.id}`); //
-            const preferences = Array.isArray(response.data) ? response.data : []; //
-            const userPref = preferences.find(p => p.user_id === user.id); //
-            setPreference(userPref?.view_type || 'day'); //
+            const response = await apiClient.get(`/visualization-preferences?user_id=${user.id}`);
+            const preferences = Array.isArray(response.data) ? response.data : [];
+            const userPref = preferences.find(p => p.user_id === user.id);
+            setPreference(userPref?.view_type || 'day');
         } catch (error) {
-            console.error('Erro ao buscar preferência:', error); //
-            setPreference('day'); // Fallback para 'day' //
+            console.error('Erro ao buscar preferência:', error);
+            setPreference('day'); // Fallback para 'day'
         }
-    }, [user?.id]); //
+    }, [user?.id]);
 
     // Buscar cardápios baseado na preferência
     const fetchMenus = useCallback(async () => {
-        if (!user?.id) return; //
+        if (!user?.id) return;
         
-        setLoading(true); //
+        setLoading(true);
         try {
-            let response; //
+            let response;
             const today = new Date();
             const formattedToday = formatDate(today); // Data de hoje formatada
             const startOfWeek = formatDate(getStartOfWeek(today)); // Data de início da semana formatada
 
-            if (preference === 'week') { //
+            if (preference === 'week') {
                 // Ajustado para passar o userId e a data de início da semana
-                response = await apiClient.get(`/menus/week/${user.id}/${startOfWeek}`); //
-                console.log('Cardápio semanal recebido:', response.data); //
-            } else { //
+                response = await apiClient.get(`/menus/week/${user.id}/${startOfWeek}`); // <<-- CORREÇÃO AQUI
+                console.log('Cardápio semanal recebido:', response.data);
+            } else {
                 // Ajustado para passar o userId e a data atual
-                response = await apiClient.get(`/menus/day/${user.id}/${formattedToday}`); //
-                console.log('Cardápio diário recebido:', response.data); //
+                response = await apiClient.get(`/menus/day/${user.id}/${formattedToday}`); // <<-- CORREÇÃO AQUI
+                console.log('Cardápio diário recebido:', response.data);
             }
             
-            // Processar resposta //
-            let menusData = []; //
-            if (response.data) { //
-                if (Array.isArray(response.data)) { //
-                    menusData = response.data.filter(menu => menu != null); //
+            // Processar resposta
+            let menusData = [];
+            if (response.data) {
+                if (Array.isArray(response.data)) {
+                    menusData = response.data.filter(menu => menu != null);
                 } else {
-                    menusData = [response.data]; //
+                    menusData = [response.data];
                 }
             }
             
-            setMenus(menusData); //
+            setMenus(menusData);
         } catch (error) {
-            console.error('Erro ao buscar cardápios:', error.response?.data || error.message); //
-            Alert.alert('Erro', 'Não foi possível carregar o cardápio.'); //
-            setMenus([]); //
+            console.error('Erro ao buscar cardápios:', error.response?.data || error.message);
+            Alert.alert('Erro', 'Não foi possível carregar o cardápio.');
+            setMenus([]);
         } finally {
-            setLoading(false); //
+            setLoading(false);
         }
-    }, [user?.id, preference]); //
+    }, [user?.id, preference]);
 
-    // Carregar preferência quando a tela ganhar foco //
-    useFocusEffect( //
-        useCallback(() => { //
-            fetchPreference(); //
-        }, [fetchPreference]) //
-    ); //
+    // Carregar preferência quando a tela ganhar foco
+    useFocusEffect(
+        useCallback(() => {
+            fetchPreference();
+        }, [fetchPreference])
+    );
 
-    // Carregar cardápios quando a preferência mudar //
-    useFocusEffect( //
-        useCallback(() => { //
-            if (preference) { //
-                fetchMenus(); //
+    // Carregar cardápios quando a preferência mudar
+    useFocusEffect(
+        useCallback(() => {
+            if (preference) {
+                fetchMenus();
             }
-        }, [fetchMenus, preference]) //
-    ); //
+        }, [fetchMenus, preference])
+    );
 
-    const onRefresh = useCallback(async () => { //
-        setRefreshing(true); //
-        await fetchPreference(); //
-        await fetchMenus(); //
-        setRefreshing(false); //
-    }, [fetchPreference, fetchMenus]); //
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchPreference();
+        await fetchMenus();
+        setRefreshing(false);
+    }, [fetchPreference, fetchMenus]);
 
-    const renderMenuItem = ({ item }) => { //
-        if (!item) return null; //
+    const renderMenuItem = ({ item }) => {
+        if (!item) return null;
         
         return (
             <View style={styles.menuBox}>
@@ -116,8 +116,8 @@ export default function StudentMenuScreen() {
                     {item.date ? new Date(item.date).toLocaleDateString('pt-BR') : 'Data não disponível'}
                 </Text>
                 
-                {item.menu_items && item.menu_items.length > 0 ? ( //
-                    item.menu_items.map(menuItem => ( //
+                {item.menu_items && item.menu_items.length > 0 ? (
+                    item.menu_items.map(menuItem => (
                         <View key={menuItem.id || menuItem.type} style={styles.menuItemContainer}>
                             <Text style={styles.menuItemType}>
                                 {menuItem.type.charAt(0).toUpperCase() + menuItem.type.slice(1)}:
@@ -128,14 +128,14 @@ export default function StudentMenuScreen() {
                         </View>
                     ))
                 ) : (
-                    <Text style={styles.noItemsText}>Nenhum item no cardápio</Text> //
+                    <Text style={styles.noItemsText}>Nenhum item no cardápio</Text>
                 )}
             </View>
         );
     };
 
-    if (loading && !refreshing) { //
-        return <ActivityIndicator size="large" style={styles.centered} />; //
+    if (loading && !refreshing) {
+        return <ActivityIndicator size="large" style={styles.centered} />;
     }
 
     return (
@@ -145,17 +145,17 @@ export default function StudentMenuScreen() {
             </Text>
             
             <FlatList
-                data={menus} //
-                keyExtractor={(item, index) => item?.id ? item.id.toString() : index.toString()} //
-                renderItem={renderMenuItem} //
-                contentContainerStyle={styles.listContainer} //
-                refreshControl={ //
-                    <RefreshControl //
-                        refreshing={refreshing} //
-                        onRefresh={onRefresh} //
+                data={menus}
+                keyExtractor={(item, index) => item?.id ? item.id.toString() : index.toString()}
+                renderItem={renderMenuItem}
+                contentContainerStyle={styles.listContainer}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
                     />
                 }
-                ListEmptyComponent={ //
+                ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>
                             {preference === 'week' 
