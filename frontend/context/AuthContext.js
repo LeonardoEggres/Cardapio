@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await apiClient.post('/login', { email, password });
             const { user, access_token } = response.data;
-            await StorageService.setItem('authToken', access_token);
+            await StorageService.setItem('authToken', access_token); // Aqui salva o token
             apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
             setAuthState({ token: access_token, authenticated: true, user, isLoading: false });
             return { success: true };
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
             console.log('Dados enviados para registro:', { name, email, password, password_confirmation, role });
             const response = await apiClient.post('/register', { name, email, password, password_confirmation, role });
             const { user, access_token } = response.data;
-            await StorageService.setItem('authToken', access_token);
+            await StorageService.setItem('authToken', access_token); // Aqui salva o token
             apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
             setAuthState({ token: access_token, authenticated: true, user, isLoading: false });
             return { success: true };

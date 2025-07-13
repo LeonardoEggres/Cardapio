@@ -83,11 +83,10 @@ class VisualizationPreferencesController extends Controller
         }
     }
 
-    public function menuByDay(int $userId, ?string $date = null)
+    public function menuByDay(?string $date = null)
     {
         $date = $date ? Carbon::parse($date)->format('Y-m-d') : Carbon::today()->format('Y-m-d');
         $menu = Menu::with('menu_items')
-            ->where('created_by', $userId)
             ->whereDate('date', $date)
             ->first();
 
@@ -98,14 +97,13 @@ class VisualizationPreferencesController extends Controller
         return response()->json($menu, 200);
     }
 
-    public function menuByWeek(int $userId, ?string $startDate = null)
+    public function menuByWeek(?string $startDate = null)
     {
         $date = $startDate ? Carbon::parse($startDate) : Carbon::today();
         $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
         $endOfWeek = $date->copy()->endOfWeek(Carbon::FRIDAY)->format('Y-m-d');
 
         $menus = Menu::with('menu_items')
-            ->where('created_by', $userId)
             ->whereBetween('date', [$startOfWeek, $endOfWeek])
             ->orderBy('date')
             ->get();
@@ -113,4 +111,3 @@ class VisualizationPreferencesController extends Controller
         return response()->json($menus, 200);
     }
 }
-

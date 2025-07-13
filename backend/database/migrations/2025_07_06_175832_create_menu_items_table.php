@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('menu_id')->constrained();
+            $table->foreignId('menu_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['café', 'almoço', 'janta']);
             $table->text('description');
             $table->timestamps();

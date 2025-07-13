@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, Pressable, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, Alert, Modal, TextInput } from 'react-native';
 import apiClient from '../../api/client';
 import { useFocusEffect } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 
-function MenuForm({ onSaved, onCancel, menu }) {
+function MenuForm({ onSaved, onCancel, menu, user }) { 
     const [date, setDate] = useState(menu?.date ? new Date(menu.date).toISOString().split('T')[0] : '');
-    const [items, setItems] = useState(menu?.menu_items || [
+    const [items, setItems] = useState(menu?.menu_items?.length ? menu.menu_items : [
         { type: 'café', description: '' },
         { type: 'almoço', description: '' },
         { type: 'janta', description: '' }
@@ -20,23 +20,37 @@ function MenuForm({ onSaved, onCancel, menu }) {
     };
 
     const handleSubmit = async () => {
+        if (!date) {
+            Alert.alert('Erro', 'A data é obrigatória.');
+            return;
+        }
+        
         setLoading(true);
         try {
             let menuId = menu?.id;
+
+            // Criar ou atualizar o menu
             if (!menuId) {
-                const res = await apiClient.post('/menus', { date });
-                menuId = res.data.data.id;
+                const res = await apiClient.post('/menus', { 
+                    date, 
+                    created_by: user.id 
+                });
+                menuId = res.data.data ? res.data.data.id : res.data.id;
             } else {
                 await apiClient.put(`/menus/${menuId}`, { date });
             }
+
+            // Processar os itens do menu
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 if (item.id) {
+                    // Atualizar item existente
                     await apiClient.put(`/menu-items/${item.id}`, {
                         type: item.type,
                         description: item.description,
                     });
                 } else {
+                    // Criar novo item
                     await apiClient.post('/menu-items', {
                         menu_id: menuId,
                         type: item.type,
@@ -44,10 +58,15 @@ function MenuForm({ onSaved, onCancel, menu }) {
                     });
                 }
             }
-            Alert.alert('Sucesso', 'Cardápio salvo!');
+            
+            Alert.alert('Sucesso', 'Cardápio salvo com sucesso!');
             onSaved();
         } catch (e) {
-            Alert.alert('Erro', 'Não foi possível salvar o cardápio.');
+            console.error('Erro ao salvar cardápio:', e);
+            const errorMsg = e.response?.data?.errors
+                ? Object.values(e.response.data.errors).flat().join('\n')
+                : e.response?.data?.message || 'Não foi possível salvar o cardápio.';
+            Alert.alert('Erro', errorMsg);
         } finally {
             setLoading(false);
         }
@@ -56,13 +75,15 @@ function MenuForm({ onSaved, onCancel, menu }) {
     return (
         <View style={styles.formContainer}>
             <Text style={styles.formTitle}>{menu ? 'Editar Cardápio' : 'Novo Cardápio'}</Text>
+            
             <Text style={styles.label}>Data (AAAA-MM-DD)</Text>
             <TextInput
                 style={styles.input}
                 value={date}
                 onChangeText={setDate}
-                placeholder="2025-07-10"
+                placeholder="AAAA-MM-DD"
             />
+            
             {items.map((item, idx) => (
                 <View key={item.type} style={styles.inputGroup}>
                     <Text style={styles.label}>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</Text>
@@ -74,8 +95,15 @@ function MenuForm({ onSaved, onCancel, menu }) {
                     />
                 </View>
             ))}
-            <Button title={loading ? 'Salvando...' : 'Salvar'} onPress={handleSubmit} disabled={loading} />
-            <Button title="Cancelar" color="red" onPress={onCancel} />
+            
+            <View style={styles.buttonGroup}>
+                <Button 
+                    title={loading ? 'Salvando...' : 'Salvar'} 
+                    onPress={handleSubmit} 
+                    disabled={loading} 
+                />
+                <Button title="Cancelar" color="gray" onPress={onCancel} />
+            </View>
         </View>
     );
 }
@@ -87,20 +115,32 @@ export default function NutricionistMenusScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedMenu, setSelectedMenu] = useState(null);
 
-    const fetchMenus = useCallback(() => {
+    const fetchMenus = useCallback(async () => {
         setLoading(true);
-        apiClient.get('/menus')
-            .then(response => setMenus(response.data))
-            .catch(error => Alert.alert("Erro ao buscar cardápios:", error.message))
-            .finally(() => setLoading(false));
+        try {
+            const response = await apiClient.get('/menus');
+            console.log('Menus recebidos:', response.data);
+            
+            // Garantir que sempre temos um array
+            const menusData = Array.isArray(response.data) ? response.data : 
+                            response.data.data ? response.data.data : [];
+            
+            setMenus(menusData);
+        } catch (error) {
+            console.error('Erro ao buscar cardápios:', error);
+            Alert.alert('Erro', 'Não foi possível carregar os cardápios.');
+            setMenus([]);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     useFocusEffect(fetchMenus);
 
     const handleDelete = async (menuId) => {
         Alert.alert(
-            'Confirmar Exclusão',
-            'Deseja realmente excluir este cardápio?',
+            'Confirmar Exclusão', 
+            'Deseja realmente excluir este cardápio?', 
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
@@ -109,11 +149,10 @@ export default function NutricionistMenusScreen() {
                     onPress: async () => {
                         try {
                             await apiClient.delete(`/menus/${menuId}`);
-                            setMenus(prev => prev.filter(menu => menu.id !== menuId));
-                            setSelectedMenu(null);
-                            setModalVisible(false);
-                            Alert.alert('Sucesso', 'Cardápio apagado!');
-                        } catch (e) {
+                            Alert.alert('Sucesso', 'Cardápio excluído com sucesso!');
+                            fetchMenus(); // Recarregar a lista
+                        } catch (error) {
+                            console.error('Erro ao excluir cardápio:', error);
                             Alert.alert('Erro', 'Não foi possível excluir o cardápio.');
                         }
                     }
@@ -145,21 +184,21 @@ export default function NutricionistMenusScreen() {
 
     const renderItem = ({ item }) => (
         <View style={styles.menuBox}>
-            <Pressable onPress={() => handleEdit(item)}>
-                <Text style={styles.menuDate}>{new Date(item.date).toLocaleDateString()}</Text>
+            <View style={styles.menuContent}>
+                <Text style={styles.menuDate}>
+                    {new Date(item.date).toLocaleDateString('pt-BR')}
+                </Text>
                 {item.menu_items?.map(menuItem => (
                     <Text key={menuItem.id} style={styles.menuItem}>
-                        {menuItem.type.charAt(0).toUpperCase() + menuItem.type.slice(1)}: {menuItem.description}
+                        <Text style={styles.menuItemType}>
+                            {menuItem.type.charAt(0).toUpperCase() + menuItem.type.slice(1)}:
+                        </Text> {menuItem.description}
                     </Text>
                 ))}
-            </Pressable>
+            </View>
             <View style={styles.menuActions}>
                 <Button title="Editar" onPress={() => handleEdit(item)} />
-                <Button
-                    title="Excluir"
-                    color="red"
-                    onPress={() => handleDelete(item.id)}
-                />
+                <Button title="Excluir" color="red" onPress={() => handleDelete(item.id)} />
             </View>
         </View>
     );
@@ -175,10 +214,12 @@ export default function NutricionistMenusScreen() {
                 data={menus}
                 keyExtractor={item => item.id.toString()}
                 renderItem={renderItem}
-                ListEmptyComponent={<Text>Nenhum cardápio encontrado.</Text>}
+                contentContainerStyle={styles.listContainer}
+                ListEmptyComponent={<Text style={styles.emptyText}>Nenhum cardápio encontrado.</Text>}
             />
-            <Modal visible={modalVisible} animationType="slide">
+            <Modal visible={modalVisible} animationType="slide" onRequestClose={handleCancel}>
                 <MenuForm
+                    user={user}
                     menu={selectedMenu}
                     onSaved={handleSaved}
                     onCancel={handleCancel}
@@ -189,15 +230,86 @@ export default function NutricionistMenusScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20 },
-    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    menuBox: { marginBottom: 20, padding: 15, backgroundColor: '#f9f9f9', borderRadius: 8 },
-    menuDate: { fontWeight: 'bold', marginBottom: 8 },
-    menuItem: { fontSize: 16, marginBottom: 5 },
-    menuActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-    formContainer: { flex: 1, padding: 20, backgroundColor: '#fff' },
-    formTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
-    label: { fontWeight: 'bold', marginBottom: 5 },
-    input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, fontSize: 16, color: '#000', marginBottom: 10 },
-    inputGroup: { marginBottom: 15 },
+    container: { 
+        flex: 1, 
+        padding: 15, 
+        backgroundColor: '#fff' 
+    },
+    centered: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    listContainer: {
+        paddingVertical: 15
+    },
+    menuBox: { 
+        marginBottom: 15, 
+        padding: 15, 
+        backgroundColor: '#f9f9f9', 
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#eee'
+    },
+    menuContent: {
+        marginBottom: 10
+    },
+    menuDate: { 
+        fontWeight: 'bold', 
+        fontSize: 18, 
+        marginBottom: 8, 
+        color: '#333' 
+    },
+    menuItem: { 
+        fontSize: 16, 
+        marginBottom: 5, 
+        color: '#555' 
+    },
+    menuItemType: {
+        fontWeight: 'bold'
+    },
+    menuActions: { 
+        flexDirection: 'row', 
+        justifyContent: 'flex-end', 
+        gap: 10 
+    },
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 20,
+        fontSize: 16,
+        color: '#666'
+    },
+    // Estilos do formulário
+    formContainer: { 
+        flex: 1, 
+        padding: 20, 
+        backgroundColor: '#fff', 
+        justifyContent: 'center' 
+    },
+    formTitle: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        marginBottom: 20, 
+        textAlign: 'center' 
+    },
+    label: { 
+        fontWeight: 'bold', 
+        marginBottom: 5, 
+        fontSize: 16 
+    },
+    input: { 
+        borderWidth: 1, 
+        borderColor: '#ccc', 
+        borderRadius: 5, 
+        padding: 10, 
+        fontSize: 16, 
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9'
+    },
+    inputGroup: { 
+        marginBottom: 15 
+    },
+    buttonGroup: {
+        gap: 10
+    }
 });

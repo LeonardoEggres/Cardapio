@@ -37,6 +37,8 @@ export default function AppLayout() {
                 <Tabs.Screen name="index" options={{ href: null }} />
                 <Tabs.Screen name="dayli-menu" options={{ href: null }} />
                 <Tabs.Screen name="weekly-menu" options={{ href: null }} />
+                <Tabs.Screen name="nutricionist-menus" options={{ href: null }} />
+                <Tabs.Screen name="nutricionist-users" options={{ href: null }} />
             </Tabs>
         );
     }
