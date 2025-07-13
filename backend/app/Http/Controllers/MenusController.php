@@ -50,6 +50,10 @@ class MenusController extends Controller
 
     public function destroy(Menu $menu)
     {
+        if (auth()->User::role !== 'nutricionist') {
+            return response()->json(['error' => 'Apenas nutricionistas podem excluir cardápios.'], 403);
+        }
+
         $menu->menu_items()->delete();
         $menu->delete();
 

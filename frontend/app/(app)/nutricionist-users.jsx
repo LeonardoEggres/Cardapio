@@ -1,27 +1,26 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
-    import apiClient from '../../api/client';
+import apiClient from '../../api/client';
 import { useFocusEffect } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 
-export default function UsersScreen() {
+export default function NutricionistUsersScreen() {
     const { user } = useAuth();
-    if (user?.role !== 'nutricionist') {
-        return null;
-    }
-
-    const [users, setUsers] = useState([]);
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchUsers = useCallback(() => {
+    const fetchStudents = useCallback(() => {
         setLoading(true);
         apiClient.get('/users')
-            .then(response => setUsers(response.data))
-            .catch(error => console.error("Erro ao buscar usuários:", error))
+            .then(response => {
+                const alunos = response.data.filter(u => u.role === 'student');
+                setStudents(alunos);
+            })
+            .catch(error => console.error("Erro ao buscar alunos:", error))
             .finally(() => setLoading(false));
     }, []);
 
-    useFocusEffect(fetchUsers);
+    useFocusEffect(fetchStudents);
 
     if (loading) {
         return <ActivityIndicator size="large" style={styles.centered} />;
@@ -29,8 +28,9 @@ export default function UsersScreen() {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>Alunos Cadastrados</Text>
             <FlatList
-                data={users}
+                data={students}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.itemContainer}>
@@ -38,7 +38,8 @@ export default function UsersScreen() {
                         <Text>{item.email}</Text>
                     </View>
                 )}
-                onRefresh={fetchUsers}
+                ListEmptyComponent={<Text>Nenhum aluno encontrado.</Text>}
+                onRefresh={fetchStudents}
                 refreshing={loading}
             />
         </View>
@@ -46,8 +47,9 @@ export default function UsersScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: { flex: 1, padding: 20 },
     centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     itemContainer: { padding: 15, backgroundColor: 'white', borderBottomWidth: 1, borderBottomColor: '#eee' },
     itemText: { fontSize: 18, fontWeight: 'bold' },
 });

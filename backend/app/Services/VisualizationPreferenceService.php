@@ -50,7 +50,9 @@ class VisualizationPreferenceService
         DB::beginTransaction();
         try {
             $preference = VisualizationPreference::findOrFail($id);
-            $preference->update($data);
+            $preference->update([
+                'view_type' => $data['view_type'],
+            ]);
             DB::commit();
             return $preference;
         } catch (ModelNotFoundException $e) {

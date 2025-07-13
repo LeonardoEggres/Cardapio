@@ -6,12 +6,14 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AuthService
 {
     public function register(array $data)
     {
         try {
+            Log::info('AuthService register data:', $data);
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -25,9 +27,10 @@ class AuthService
                 'message' => 'Usuário registrado com sucesso!',
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'user' => $user->only(['id', 'name', 'email', 'role']), // Retorna apenas dados seguros do usuário
+                'user' => $user->only(['id', 'name', 'email', 'role']),
             ];
         } catch (Exception $e) {
+            Log::error('Erro ao registrar usuário: ' . $e->getMessage());
             throw new Exception("Erro ao registrar usuário: " . $e->getMessage());
         }
     }
@@ -43,7 +46,6 @@ class AuthService
                 ]);
             }
 
-            // Opcional: Revogar todos os tokens antigos do usuário ao fazer login para segurança
             $user->tokens()->delete();
 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -52,10 +54,10 @@ class AuthService
                 'message' => 'Login realizado com sucesso!',
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'user' => $user->only(['id', 'name', 'email', 'role']), // Retorna apenas dados seguros do usuário
+                'user' => $user->only(['id', 'name', 'email', 'role']),
             ];
         } catch (ValidationException $e) {
-            throw $e; // Re-lança a exceção de validação para ser tratada pelo handler do Laravel ou pelo Controller
+            throw $e;
         } catch (Exception $e) {
             throw new Exception("Erro ao tentar login: " . $e->getMessage());
         }

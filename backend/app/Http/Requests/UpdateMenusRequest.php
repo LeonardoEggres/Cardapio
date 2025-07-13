@@ -12,7 +12,6 @@ class UpdateMenusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Apenas nutricionistas podem atualizar cardápios
         return $this->user()->role === 'nutricionist';
     }
 
@@ -23,16 +22,14 @@ class UpdateMenusRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Pega o ID do menu da rota para ignorar na validação unique da data.
-        $menuId = $this->route('menu'); // 'menu' é o nome do parâmetro na rota, ex: /menus/{menu}
+        $menuId = $this->route('menu');
 
         return [
             'date' => [
-                'sometimes', // Permite que a data não seja enviada se não for para ser atualizada
+                'sometimes',
                 'date',
                 Rule::unique('menus', 'date')->ignore($menuId),
             ],
-            // Adicione outras regras para os campos do menu, se houver
         ];
     }
 

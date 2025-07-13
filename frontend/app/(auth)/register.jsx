@@ -8,6 +8,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [role, setRole] = useState('student');
   
   const { register } = useAuth();
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function Register() {
       return;
     }
 
-    const result = await register(name, email, password, passwordConfirmation);
+    const result = await register(name, email, password, passwordConfirmation, role);
 
     if (result.success) {
       Alert.alert('Sucesso!', 'Sua conta foi criada.');
@@ -65,6 +66,12 @@ export default function Register() {
         secureTextEntry
       />
       
+      <View style={styles.roleContainer}>
+        <Text style={styles.roleLabel}>Tipo de usuário:</Text>
+        <Button title="Aluno" onPress={() => setRole('student')} color={role === 'student' ? 'green' : 'gray'} />
+        <Button title="Nutricionista" onPress={() => setRole('nutricionist')} color={role === 'nutricionist' ? 'green' : 'gray'} />
+      </View>
+      
       <Button title="Cadastrar" onPress={handleRegister} />
       
       <Link href="/login" asChild>
@@ -81,4 +88,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 32, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
   input: { height: 45, borderColor: 'gray', borderWidth: 1, marginBottom: 15, padding: 10, borderRadius: 5 },
   link: { marginTop: 20, color: 'blue', textAlign: 'center' },
+  roleContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
+  roleLabel: { fontWeight: 'bold', marginBottom: 5 },
 });

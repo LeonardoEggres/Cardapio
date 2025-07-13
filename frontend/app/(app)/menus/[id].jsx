@@ -1,11 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Button, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import apiClient from '../../api/client';
+import apiClient from '../../../api/client';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function MenuDetails() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+    const { user } = useAuth();
     const [menu, setMenu] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -62,10 +64,12 @@ export default function MenuDetails() {
             {menu.menu_items?.map(item => (
                 <Text key={item.id} style={styles.item}>{item.description}</Text>
             ))}
-            <View style={styles.buttonContainer}>
-                <Button title="Editar" onPress={() => router.push(`/menus/edit/${id}`)} />
-                <Button title="Excluir" color="red" onPress={handleDelete} />
-            </View>
+            {user?.role === 'nutricionist' && (
+                <View style={styles.buttonContainer}>
+                    <Button title="Editar" onPress={() => router.push(`/menus/edit/${id}`)} />
+                    <Button title="Excluir" color="red" onPress={handleDelete} />
+                </View>
+            )}
         </View>
     );
 }

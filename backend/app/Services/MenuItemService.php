@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\MenuItem;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB; // Adicionado para transações
+use Illuminate\Support\Facades\DB;
 
 class MenuItemService
 {

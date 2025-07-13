@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import apiClient from '../../api/client';
+import apiClient from '../../../api/client'; 
+import { useAuth } from '../../../context/AuthContext';
 
 export default function CreateMenu() {
+    const { user } = useAuth();
+    if (user?.role === 'student') {
+        return null;
+    }
+
     const [date, setDate] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();

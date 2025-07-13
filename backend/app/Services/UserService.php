@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB; // Adicionado para transações
-use Illuminate\Support\Facades\Hash; // Para hash da senha
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -34,7 +34,6 @@ class UserService
     {
         DB::beginTransaction();
         try {
-            // Garante que a senha seja hashed antes de criar o usuário
             $data['password'] = Hash::make($data['password']);
             $user = User::create($data);
             DB::commit();
@@ -50,7 +49,6 @@ class UserService
         DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
-            // Hashing da nova senha se ela for fornecida
             if (isset($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             }
@@ -83,7 +81,6 @@ class UserService
         }
     }
 
-    // Métodos auxiliares, se ainda forem necessários aqui
     public function isStudent(User $user): bool
     {
         return $user->role === 'student';

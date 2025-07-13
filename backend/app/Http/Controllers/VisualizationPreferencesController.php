@@ -83,26 +83,34 @@ class VisualizationPreferencesController extends Controller
         }
     }
 
-
-    public function getDailyMenu(int $userId, ?string $date = null)
+    public function menuByDay(int $userId, ?string $date = null)
     {
         $date = $date ? Carbon::parse($date)->format('Y-m-d') : Carbon::today()->format('Y-m-d');
-
-        return Menu::where('user_id', $userId)
+        $menu = Menu::with('menu_items')
+            ->where('created_by', $userId)
             ->whereDate('date', $date)
             ->first();
+
+        if (!$menu) {
+            return response()->json(null, 200);
+        }
+
+        return response()->json($menu, 200);
     }
 
-    public function getWeeklyMenu(int $userId, ?string $date = null)
+    public function menuByWeek(int $userId, ?string $startDate = null)
     {
-        $date = $date ? Carbon::parse($date) : Carbon::today();
-
+        $date = $startDate ? Carbon::parse($startDate) : Carbon::today();
         $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
         $endOfWeek = $date->copy()->endOfWeek(Carbon::FRIDAY)->format('Y-m-d');
 
-        return Menu::where('user_id', $userId)
+        $menus = Menu::with('menu_items')
+            ->where('created_by', $userId)
             ->whereBetween('date', [$startOfWeek, $endOfWeek])
             ->orderBy('date')
             ->get();
+
+        return response()->json($menus, 200);
     }
 }
+

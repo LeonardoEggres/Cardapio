@@ -14,7 +14,7 @@ const InitialLayout = () => {
         const inAuthGroup = segments[0] === '(auth)';
 
         if (authenticated && inAuthGroup) {
-            router.replace('/(app)');
+            router.replace('/(app)/student-menu');
         } else if (!authenticated && !inAuthGroup) {
             router.replace('/(auth)/login');
         }

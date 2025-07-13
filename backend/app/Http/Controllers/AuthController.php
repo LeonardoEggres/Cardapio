@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth; // <-- Importação ADICIONADA para a Facade Auth
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -22,6 +23,8 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         try {
+            Log::info('Dados recebidos no registro:', $request->all());
+            Log::info('Dados validados no registro:', $request->validated());
             $result = $this->authService->register($request->validated());
             return response()->json($result, 201);
         } catch (Exception $e) {
@@ -44,7 +47,6 @@ class AuthController extends Controller
     public function logout(): JsonResponse
     {
         try {
- 
             $user = Auth::guard('sanctum')->user();
 
             if (!$user) {
@@ -58,3 +60,4 @@ class AuthController extends Controller
         }
     }
 }
+

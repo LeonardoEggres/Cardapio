@@ -9,12 +9,10 @@ class RegisterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     * Define se o usuário (neste caso, um convidado) pode fazer esta requisição.
-     * Para registro, geralmente é true, pois qualquer um pode se registrar.
      */
     public function authorize(): bool
     {
-        return true; // Permitir que usuários não autenticados (convidados) façam esta requisição
+        return true;
     }
 
     /**
@@ -29,13 +27,12 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string',
                 Password::min(8)
-                    ->mixedCase() // Pelo menos uma letra maiúscula e uma minúscula
-                    ->numbers()   // Pelo menos um número
-                    ->symbols(),  // Pelo menos um símbolo
-                'confirmed' // Requer um campo password_confirmation que deve ser idêntico
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+                'confirmed'
             ],
-            // A role pode ser definida pelo frontend ou fixada no backend
-            // Se for enviada pelo frontend, você pode validar:
+           
             'role' => ['required', 'string', 'in:student,nutricionist'],
         ];
     }

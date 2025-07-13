@@ -41,7 +41,6 @@ export default function MenuForm({ menu, onSaved, onCancel }) {
       let menuId;
 
       if (menu?.id) {
-        // Atualizar menu existente
         await api.put(`/menus/${menu.id}`, {
           date: formatDateToISO(date)
         }, {
@@ -50,7 +49,6 @@ export default function MenuForm({ menu, onSaved, onCancel }) {
 
         menuId = menu.id;
 
-        // Atualizar ou criar itens do menu
         for (const item of menuItems) {
           if (item.id) {
             await api.put(`/menu-items/${item.id}`, item, {
@@ -68,7 +66,6 @@ export default function MenuForm({ menu, onSaved, onCancel }) {
 
         Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
       } else {
-        // Criar novo menu
         const newMenuResponse = await api.post('/menus', {
           date: formatDateToISO(date)
         }, {
@@ -77,7 +74,6 @@ export default function MenuForm({ menu, onSaved, onCancel }) {
 
         menuId = newMenuResponse.data.data.id;
 
-        // Criar itens do menu
         for (const item of menuItems) {
           await api.post('/menu-items', {
             menu_id: menuId,
@@ -97,7 +93,6 @@ export default function MenuForm({ menu, onSaved, onCancel }) {
     }
   };
 
-  // Função para converter data do formato DD/MM/AAAA para AAAA-MM-DD (ISO)
   function formatDateToISO(dateStr) {
     const [day, month, year] = dateStr.split('/');
     if (!day || !month || !year) return null;

@@ -5,16 +5,15 @@ namespace App\Services;
 use App\Models\Menu;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB; // Adicionado para transações
+use Illuminate\Support\Facades\DB;
 
 class MenuService
 {
     public function index()
     {
         try {
-            return Menu::with('menu_items')->get(); // Retorna a coleção de Models diretamente
+            return Menu::with('menu_items')->get();
         } catch (Exception $e) {
-            // Lança uma exceção genérica para ser tratada no Controller
             throw new Exception("Ocorreu um erro ao retornar os cardápios: " . $e->getMessage());
         }
     }
@@ -22,9 +21,9 @@ class MenuService
     public function show($id)
     {
         try {
-            return Menu::findOrFail($id); // Retorna o Model ou lança ModelNotFoundException
+            return Menu::findOrFail($id);
         } catch (ModelNotFoundException $e) {
-            throw $e; // Relança a exceção para o Controller
+            throw $e;
         } catch (Exception $e) {
             throw new Exception("Ocorreu um erro ao buscar o cardápio: " . $e->getMessage());
         }
@@ -34,7 +33,7 @@ class MenuService
     {
         DB::beginTransaction();
         try {
-            $menu = Menu::create($data); // Retorna o Model criado
+            $menu = Menu::create($data);
             DB::commit();
             return $menu;
         } catch (Exception $e) {
@@ -48,9 +47,9 @@ class MenuService
         DB::beginTransaction();
         try {
             $menu = Menu::findOrFail($id);
-            $menu->update($data); // Retorna true/false ou lança exceção
+            $menu->update($data);
             DB::commit();
-            return $menu; // Retorna o Model atualizado
+            return $menu;
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             throw $e;
@@ -65,9 +64,9 @@ class MenuService
         DB::beginTransaction();
         try {
             $menu = Menu::findOrFail($id);
-            $menu->delete(); // Retorna true/false
+            $menu->delete();
             DB::commit();
-            return true; // Indica sucesso na exclusão
+            return true;
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             throw $e;

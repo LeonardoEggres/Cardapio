@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import apiClient from '../../api/client';
+import apiClient from '../../../../api/client'; 
+import { useAuth } from '../../../../context/AuthContext';
 
 export default function EditMenu() {
     const { id } = useLocalSearchParams();
@@ -9,6 +10,7 @@ export default function EditMenu() {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
     const router = useRouter();
+    const { user } = useAuth();
 
     useFocusEffect(
         useCallback(() => {
@@ -33,6 +35,10 @@ export default function EditMenu() {
             .catch(error => Alert.alert('Erro', 'Não foi possível atualizar.'))
             .finally(() => setLoading(false));
     };
+
+    if (user?.role === 'student') {
+        return null; 
+    }
 
     if (pageLoading) {
         return <ActivityIndicator size="large" style={{ flex: 1 }} />;

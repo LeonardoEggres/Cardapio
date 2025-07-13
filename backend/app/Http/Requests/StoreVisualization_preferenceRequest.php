@@ -11,8 +11,6 @@ class StoreVisualization_preferenceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // O usuário autenticado pode criar sua própria preferência de visualização.
-        // Ou um administrador pode criar para outro usuário (se aplicável).
         return $this->user()->id == $this->input('user_id') || $this->user()->role === 'admin';
     }
 

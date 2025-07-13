@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
         authenticated: false,
         user: null,
         isLoading: true,
+        role: null,
     });
 
     useEffect(() => {
@@ -19,13 +20,13 @@ export const AuthProvider = ({ children }) => {
                 apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 try {
                     const { data: user } = await apiClient.get('/user');
-                    setAuthState({ token, authenticated: true, user, isLoading: false });
+                    setAuthState({ token, authenticated: true, user, isLoading: false, role: user.role });
                 } catch (error) {
                     await StorageService.deleteItem('authToken');
-                    setAuthState({ token: null, authenticated: false, user: null, isLoading: false });
+                    setAuthState({ token: null, authenticated: false, user: null, isLoading: false, role: null });
                 }
             } else {
-                setAuthState({ token: null, authenticated: false, user: null, isLoading: false });
+                setAuthState({ token: null, authenticated: false, user: null, isLoading: false, role: null });
             }
         };
         loadToken();
@@ -34,26 +35,24 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const response = await apiClient.post('/login', { email, password });
-            const { user, token } = response.data;
-            await StorageService.setItem('authToken', token);
-            apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            setAuthState({ token, authenticated: true, user, isLoading: false });
+            const { user, access_token } = response.data;
+            await StorageService.setItem('authToken', access_token);
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+            setAuthState({ token: access_token, authenticated: true, user, isLoading: false });
             return { success: true };
         } catch (e) {
             return { success: false, error: e.response?.data?.error || 'Email ou senha inválidos' };
         }
     };
 
-    const register = async (name, email, password, password_confirmation) => {
+    const register = async (name, email, password, password_confirmation, role = 'student') => {
         try {
-            const response = await apiClient.post('/register', { name, email, password, password_confirmation });
-
-            const { user, token } = response.data;
-
-            await StorageService.setItem('authToken', token);
-            apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            setAuthState({ token, authenticated: true, user, isLoading: false });
-
+            console.log('Dados enviados para registro:', { name, email, password, password_confirmation, role });
+            const response = await apiClient.post('/register', { name, email, password, password_confirmation, role });
+            const { user, access_token } = response.data;
+            await StorageService.setItem('authToken', access_token);
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+            setAuthState({ token: access_token, authenticated: true, user, isLoading: false });
             return { success: true };
         } catch (e) {
             const errorMsg = e.response?.data?.errors
