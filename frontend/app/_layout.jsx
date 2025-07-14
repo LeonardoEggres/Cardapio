@@ -27,7 +27,7 @@ const InitialLayout = () => {
             router.replace('/(auth)/login');
         }
 
-    }, [authenticated, isLoading]); // Roda sempre que 'authenticated' ou 'isLoading' mudar
+    }, [authenticated, isLoading]);
 
     if (isLoading) {
         return (

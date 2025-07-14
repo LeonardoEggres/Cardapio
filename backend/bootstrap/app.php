@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\HandleCors; // <-- Adicione esta linha AQUI para importar o middleware
+use App\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,16 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->api(prepend: [
-            // Adicione seu middleware CORS aqui para o grupo 'api'
-            HandleCors::class, // <-- Adicione esta linha AQUI para registrar
-        ]);
 
-        // Se você tiver outros middlewares globais ou para outros grupos, eles podem vir aqui.
-        // Por exemplo:
-        // $middleware->web(append: [
-        //     \App\Http\Middleware\TrustProxies::class,
-        // ]);
+            HandleCors::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
     })->create();

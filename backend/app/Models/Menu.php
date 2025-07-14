@@ -20,7 +20,7 @@ class Menu extends Model
 
 
     protected $casts = [
-        'date' => 'date', // Garante que a coluna 'date' seja uma instância Carbon
+        'date' => 'date',  
     ];
 
 

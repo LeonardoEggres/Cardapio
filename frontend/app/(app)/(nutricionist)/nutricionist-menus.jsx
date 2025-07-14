@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Button,
   Pressable,
-  Alert, // Mantemos Alert para mensagens de Sucesso/Erro, mas não para a confirmação
+  Alert, 
   Modal,
   TextInput,
 } from "react-native";
@@ -15,14 +15,13 @@ import apiClient from "../../../api/client";
 import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../../context/AuthContext";
 
-// --- COMPONENTE DO MODAL DE CONFIRMAÇÃO CUSTOMIZADO ---
 function ConfirmationModal({ isVisible, onConfirm, onCancel }) {
   return (
     <Modal
-      animationType="fade" // 'slide' ou 'fade'
+      animationType="fade" 
       transparent={true}
       visible={isVisible}
-      onRequestClose={onCancel} // Para Android, se o usuário pressionar o botão voltar
+      onRequestClose={onCancel} 
     >
       <View style={customModalStyles.centeredView}>
         <View style={customModalStyles.modalView}>
@@ -45,7 +44,7 @@ const customModalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)", // Fundo escuro transparente
+    backgroundColor: "rgba(0,0,0,0.5)", 
   },
   modalView: {
     margin: 20,
@@ -61,8 +60,8 @@ const customModalStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    width: "80%", // Ajuste a largura conforme necessário
-    maxWidth: 400, // Largura máxima para telas maiores
+    width: "80%",  
+    maxWidth: 400, 
   },
   modalTitle: {
     marginBottom: 15,
@@ -80,10 +79,10 @@ const customModalStyles = StyleSheet.create({
     justifyContent: "space-around",
     width: "100%",
     marginTop: 10,
-    gap: 10, // Espaçamento entre botões
+    gap: 10, 
   },
 });
-// --- FIM DO MODAL DE CONFIRMAÇÃO CUSTOMIZADO ---
+
 
 function MenuForm({ onSaved, onCancel, menu, user }) {
   const [date, setDate] = useState(
@@ -191,14 +190,12 @@ export default function NutricionistMenusScreen() {
   const { user } = useAuth();
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // Para o modal de Adicionar/Editar
+  const [modalVisible, setModalVisible] = useState(false); 
   const [selectedMenu, setSelectedMenu] = useState(null);
 
-  // --- NOVOS ESTADOS PARA O MODAL DE CONFIRMAÇÃO ---
   const [isDeleteConfirmationVisible, setIsDeleteConfirmationVisible] =
     useState(false);
   const [menuToDeleteId, setMenuToDeleteId] = useState(null);
-  // --- FIM DOS NOVOS ESTADOS ---
 
   useFocusEffect(
     useCallback(() => {
@@ -217,9 +214,8 @@ export default function NutricionistMenusScreen() {
     }, [])
   );
 
-  // --- FUNÇÃO handleConfirmDelete (chamada pelo modal de confirmação) ---
   const handleConfirmDelete = async () => {
-    setIsDeleteConfirmationVisible(false); // Esconde o modal de confirmação
+    setIsDeleteConfirmationVisible(false); 
     if (menuToDeleteId) {
       try {
         await apiClient.delete(`/menus/${menuToDeleteId}`);
@@ -233,18 +229,15 @@ export default function NutricionistMenusScreen() {
           e.response?.data?.message || "Não foi possível excluir o cardápio.";
         Alert.alert("Erro", errorMsg);
       } finally {
-        setMenuToDeleteId(null); // Limpa o ID após a tentativa de exclusão
+        setMenuToDeleteId(null); 
       }
     }
   };
-  // --- FIM DA handleConfirmDelete ---
 
-  // --- FUNÇÃO handleDelete (chamada pelo botão de excluir na lista) ---
   const handleDelete = (menuId) => {
-    setMenuToDeleteId(menuId); // Define qual cardápio será excluído
-    setIsDeleteConfirmationVisible(true); // Mostra o modal de confirmação
+    setMenuToDeleteId(menuId); 
+    setIsDeleteConfirmationVisible(true); 
   };
-  // --- FIM DA handleDelete ---
 
   const handleEdit = (menu) => {
     setSelectedMenu(menu);
@@ -316,7 +309,7 @@ export default function NutricionistMenusScreen() {
         contentContainerStyle={{ paddingVertical: 20 }}
         ListEmptyComponent={<Text>Nenhum cardápio encontrado.</Text>}
       />
-      {/* Modal para Adicionar/Editar Cardápio */}
+      
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -330,13 +323,12 @@ export default function NutricionistMenusScreen() {
         />
       </Modal>
 
-      {/* Modal de Confirmação de Exclusão Customizado */}
       <ConfirmationModal
         isVisible={isDeleteConfirmationVisible}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setIsDeleteConfirmationVisible(false);
-          setMenuToDeleteId(null); // Limpa o ID se cancelar
+          setMenuToDeleteId(null); 
         }}
       />
     </View>

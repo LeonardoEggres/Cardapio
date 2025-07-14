@@ -6,21 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     * Define se o usuário (neste caso, um convidado) pode fazer esta requisição.
-     * Para login, geralmente é true.
-     */
     public function authorize(): bool
     {
-        return true; // Permitir que usuários não autenticados (convidados) façam esta requisição
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -29,11 +19,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
     public function messages(): array
     {
         return [

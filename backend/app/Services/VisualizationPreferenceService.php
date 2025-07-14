@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Models\Menu;
-use App\Models\Visualization_preference; // Use o Model correto
+use App\Models\Visualization_preference;
 use App\Models\VisualizationPreference;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB; // Adicionado para transações
+use Illuminate\Support\Facades\DB;
 
 class VisualizationPreferenceService
 {
@@ -47,7 +47,6 @@ class VisualizationPreferenceService
 
     public function update(array $data, $id)
     {
-        dd($data); // <--- ADICIONE ESTA LINHA
         DB::beginTransaction();
         try {
             $preference = VisualizationPreference::findOrFail($id);

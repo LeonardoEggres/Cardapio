@@ -12,7 +12,7 @@ class UpdateUsersRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->id == $this->route('user') || $this->user()->role === 'admin'; // Adapte sua lógica de role
+        return $this->user()->id == $this->route('user') || $this->user()->role === 'admin'; 
     }
 
 
@@ -30,7 +30,7 @@ class UpdateUsersRequest extends FormRequest
                 Rule::unique('users')->ignore($userId),
             ],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'sometimes|in:student,nutricionist', 
+            'role' => 'sometimes|in:student,nutricionist',
         ];
     }
 

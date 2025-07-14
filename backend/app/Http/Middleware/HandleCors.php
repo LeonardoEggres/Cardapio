@@ -8,14 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HandleCors
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        $allowedOrigins = ['http://localhost:8081', 'http://127.0.0.1:8081']; // Adicione todas as origens permitidas aqui
+        $allowedOrigins = ['http://localhost:8081', 'http://127.0.0.1:8081'];
         $origin = $request->headers->get('Origin');
 
         $response = $next($request);
@@ -24,10 +19,9 @@ class HandleCors
             $response->headers->set('Access-Control-Allow-Origin', $origin);
             $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With');
-            $response->headers->set('Access-Control-Allow-Credentials', 'true'); // Se você estiver usando cookies ou credenciais
+            $response->headers->set('Access-Control-Allow-Credentials', 'true');
         }
 
-        // Para requisições OPTIONS (preflight requests)
         if ($request->isMethod('OPTIONS')) {
             $response->setStatusCode(200);
         }

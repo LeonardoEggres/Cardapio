@@ -10,7 +10,7 @@ export default function NutricionistUsersScreen() {
     const fetchUsers = useCallback(() => {
         setLoading(true);
         apiClient.get('/users')
-            .then(response => setUsers(response.data.filter(user => user.role === 'student'))) // Filtra para mostrar apenas alunos
+            .then(response => setUsers(response.data.filter(user => user.role === 'student'))) 
             .catch(error => console.error("Erro ao buscar usuários:", error))
             .finally(() => setLoading(false));
     }, []);

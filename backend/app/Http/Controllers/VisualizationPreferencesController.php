@@ -6,13 +6,11 @@ use App\Models\Visualization_preference;
 use App\Http\Requests\StoreVisualization_preferenceRequest;
 use App\Http\Requests\UpdateVisualization_preferenceRequest;
 use App\Models\Menu;
-use App\Models\VisualizationPreference;
 use App\Services\VisualizationPreferenceService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 class VisualizationPreferencesController extends Controller
 {
@@ -42,30 +40,29 @@ class VisualizationPreferencesController extends Controller
                 'data' => $preference
             ], 201);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Erro ao salvar preferência: ' . $e->getMessage()], 400);
+            return response()->json(['error' => 'Erro ao cadastrar: ' . $e->getMessage()], 400);
         }
     }
 
     public function show($id): JsonResponse
     {
         try {
-            $preference = $this->visualizationPreferenceService->show($id);
-            return response()->json($preference, 200);
+            $pref = $this->visualizationPreferenceService->show($id);
+            return response()->json($pref, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Preferência não encontrada.'], 404);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar preferência: ' . $e->getMessage()], 400);
+            return response()->json(['error' => 'Erro ao buscar: ' . $e->getMessage()], 400);
         }
     }
 
     public function update(UpdateVisualization_preferenceRequest $request, $id): JsonResponse
     {
-        dd($request->validated()); // <--- ADICIONE ESTA LINHA
         try {
-            $updated = $this->visualizationPreferenceService->update($request->validated(), $id);
+            $preference = $this->visualizationPreferenceService->update($request->validated(), $id);
             return response()->json([
                 'message' => 'Preferência atualizada com sucesso!',
-                'data' => $updated
+                'data' => $preference
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Preferência não encontrada para atualização.'], 404);
@@ -100,7 +97,7 @@ class VisualizationPreferencesController extends Controller
         return response()->json($menu, 200);
     }
 
-    public function menuByWeek(int $userId, ?string $startDate = null)
+    public function menuByWeek(?string $startDate = null)
     {
         $date = $startDate ? Carbon::parse($startDate) : Carbon::today();
         $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
@@ -110,7 +107,6 @@ class VisualizationPreferencesController extends Controller
             ->whereBetween('date', [$startOfWeek, $endOfWeek])
             ->orderBy('date')
             ->get();
-
         return response()->json($menus, 200);
     }
 }
