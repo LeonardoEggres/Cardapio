@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Alert, RefreshControl } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { useAuth } from '../../context/AuthContext';
-import apiClient from '../../api/client';
+import { useAuth } from '../../../context/AuthContext';
+import apiClient from '../../../api/client';
 
 export default function StudentMenuScreen() {
     const { user } = useAuth();
@@ -11,7 +11,6 @@ export default function StudentMenuScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Função auxiliar para formatar a data como AAAA-MM-DD
     const formatDate = (date) => {
         const d = new Date(date);
         const year = d.getFullYear();
@@ -20,15 +19,13 @@ export default function StudentMenuScreen() {
         return `${year}-${month}-${day}`;
     };
 
-    // Função auxiliar para obter a data de início da semana (domingo)
     const getStartOfWeek = (date) => {
         const d = new Date(date);
-        const day = d.getDay(); // 0 for Sunday, 1 for Monday, etc.
-        const diff = d.getDate() - day; // adjust date to get Sunday
+        const day = d.getDay();
+        const diff = d.getDate() - day;
         return new Date(d.setDate(diff));
     };
 
-    // Buscar preferência do usuário
     const fetchPreference = useCallback(async () => {
         if (!user?.id) return;
         
@@ -39,11 +36,10 @@ export default function StudentMenuScreen() {
             setPreference(userPref?.view_type || 'day');
         } catch (error) {
             console.error('Erro ao buscar preferência:', error);
-            setPreference('day'); // Fallback para 'day'
+            setPreference('day'); 
         }
     }, [user?.id]);
 
-    // Buscar cardápios baseado na preferência
     const fetchMenus = useCallback(async () => {
         if (!user?.id) return;
         
@@ -51,20 +47,17 @@ export default function StudentMenuScreen() {
         try {
             let response;
             const today = new Date();
-            const formattedToday = formatDate(today); // Data de hoje formatada
-            const startOfWeek = formatDate(getStartOfWeek(today)); // Data de início da semana formatada
+            const formattedToday = formatDate(today);
+            const startOfWeek = formatDate(getStartOfWeek(today)); 
 
             if (preference === 'week') {
-                // Ajustado para passar o userId e a data de início da semana
-                response = await apiClient.get(`/menus/week/${user.id}/${startOfWeek}`); // <<-- CORREÇÃO AQUI
+                response = await apiClient.get(`/menus/week/${user.id}/${startOfWeek}`);
                 console.log('Cardápio semanal recebido:', response.data);
             } else {
-                // Ajustado para passar o userId e a data atual
-                response = await apiClient.get(`/menus/day/${user.id}/${formattedToday}`); // <<-- CORREÇÃO AQUI
+                response = await apiClient.get(`/menus/day/${user.id}/${formattedToday}`); 
                 console.log('Cardápio diário recebido:', response.data);
             }
             
-            // Processar resposta
             let menusData = [];
             if (response.data) {
                 if (Array.isArray(response.data)) {
@@ -84,14 +77,12 @@ export default function StudentMenuScreen() {
         }
     }, [user?.id, preference]);
 
-    // Carregar preferência quando a tela ganhar foco
     useFocusEffect(
         useCallback(() => {
             fetchPreference();
         }, [fetchPreference])
     );
 
-    // Carregar cardápios quando a preferência mudar
     useFocusEffect(
         useCallback(() => {
             if (preference) {

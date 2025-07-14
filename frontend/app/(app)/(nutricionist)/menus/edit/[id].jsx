@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import apiClient from '../../../../api/client'; 
-import { useAuth } from '../../../../context/AuthContext';
+import apiClient from '../../../../../api/client'; 
+import { useAuth } from '../../../../../context/AuthContext';
 
 export default function EditMenu() {
     const { id } = useLocalSearchParams();

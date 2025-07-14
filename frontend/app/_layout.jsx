@@ -1,5 +1,5 @@
-import { AuthProvider, useAuth } from '../context/AuthContext'; // Adicione useAuth aqui
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -9,16 +9,25 @@ const InitialLayout = () => {
     const router = useRouter();
 
     useEffect(() => {
-        if (isLoading) return;
+        console.log('[ROOT LAYOUT] Verificando estado...');
+        console.log('[ROOT LAYOUT] Autenticado:', authenticated);
+        console.log('[ROOT LAYOUT] Carregando:', isLoading);
+        if (isLoading) {
+            return;
+        }
 
         const inAuthGroup = segments[0] === '(auth)';
 
         if (authenticated && inAuthGroup) {
-            router.replace('/(app)/student-menu');
-        } else if (!authenticated && !inAuthGroup) {
+            console.log('[ROOT LAYOUT] Usuário autenticado, redirecionando para a área (app)...');
+            router.replace('/(app)');
+        }
+        else if (!authenticated && !inAuthGroup) {
+            console.log('[ROOT LAYOUT] Usuário NÃO autenticado, redirecionando para o login...');
             router.replace('/(auth)/login');
         }
-    }, [authenticated, isLoading]);
+
+    }, [authenticated, isLoading]); // Roda sempre que 'authenticated' ou 'isLoading' mudar
 
     if (isLoading) {
         return (
@@ -28,7 +37,7 @@ const InitialLayout = () => {
         );
     }
 
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return <Slot />;
 };
 
 export default function RootLayout() {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
-import apiClient from '../../api/client';
+import { useAuth } from '../../../context/AuthContext';
+import apiClient from '../../../api/client';
 
 export default function StudentPreferenceScreen() {
     const { user } = useAuth();
@@ -9,7 +9,6 @@ export default function StudentPreferenceScreen() {
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
 
-    // Buscar preferência atual do usuário
     useEffect(() => {
         const fetchCurrentPreference = async () => {
             if (!user?.id) return;
@@ -25,11 +24,11 @@ export default function StudentPreferenceScreen() {
                 if (userPref) {
                     setCurrentPref(userPref.view_type);
                 } else {
-                    setCurrentPref('day'); // Padrão
+                    setCurrentPref('day');
                 }
             } catch (error) {
                 console.error('Erro ao buscar preferência atual:', error);
-                setCurrentPref('day'); // Fallback
+                setCurrentPref('day');
             } finally {
                 setInitialLoading(false);
             }
@@ -46,19 +45,16 @@ export default function StudentPreferenceScreen() {
         
         setLoading(true);
         try {
-            // Primeiro, verificar se já existe uma preferência
             const response = await apiClient.get(`/visualization-preferences?user_id=${user.id}`);
             const preferences = Array.isArray(response.data) ? response.data : [];
             const existingPref = preferences.find(p => p.user_id === user.id);
             
             if (existingPref) {
-                // Atualizar preferência existente
                 await apiClient.put(`/visualization-preferences/${existingPref.id}`, {
                     view_type: viewType,
                 });
                 console.log('Preferência atualizada:', viewType);
             } else {
-                // Criar nova preferência
                 await apiClient.post('/visualization-preferences', {
                     user_id: user.id,
                     view_type: viewType,
