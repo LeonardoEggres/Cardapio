@@ -17,34 +17,6 @@ export default function NutricionistUsersScreen() {
 
     useFocusEffect(fetchUsers);
 
-    const handleDelete = (userId) => {
-        Alert.alert(
-            "Confirmar Exclusão",
-            "Você tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.",
-            [
-                {
-                    text: "Cancelar",
-                    style: "cancel"
-                },
-                {
-                    text: "Excluir",
-                    onPress: async () => {
-                        try {
-                            // Chama a API para deletar o usuário
-                            await apiClient.delete(`/users/${userId}`);
-                            Alert.alert("Sucesso", "Aluno excluído com sucesso.");
-                            // Atualiza a lista na tela para refletir a exclusão
-                            fetchUsers();
-                        } catch (error) {
-                            console.error("Erro ao excluir usuário:", error);
-                            Alert.alert("Erro", "Não foi possível excluir o aluno.");
-                        }
-                    },
-                    style: "destructive"
-                }
-            ]
-        );
-    };
 
     if (loading) {
         return <ActivityIndicator size="large" style={styles.centered} />;
@@ -61,13 +33,6 @@ export default function NutricionistUsersScreen() {
                             <Text style={styles.itemText}>{item.name}</Text>
                             <Text>{item.email}</Text>
                         </View>
-
-                        {/* <-- BOTÃO DE EXCLUIR ADICIONADO AQUI --> */}
-                        <Button
-                            title="Excluir"
-                            color="red"
-                            onPress={() => handleDelete(item.id)}
-                        />
                     </View>
                 )}
                 ListHeaderComponent={() => <Text style={styles.header}>Lista de Alunos</Text>}
