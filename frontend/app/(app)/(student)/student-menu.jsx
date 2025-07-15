@@ -7,7 +7,6 @@ import { format, startOfWeek, endOfWeek, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FontAwesome } from '@expo/vector-icons';
 
-// --- CORES E ESTILOS GLOBAIS ---
 const colors = {
     primary: 'rgb(50, 160, 65)',
     danger: 'rgb(200, 25, 30)',
@@ -49,7 +48,7 @@ export default function StudentMenuScreen() {
             setMenus(response.data ? (Array.isArray(response.data) ? response.data : [response.data]) : []);
         } catch (error) {
             console.error('Erro ao buscar cardápios:', error.response?.data || error.message);
-            setMenus([]); // limpa os menus em caso de erro para não mostrar dados antigos
+            setMenus([]); 
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -160,7 +159,7 @@ export default function StudentMenuScreen() {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={[colors.primary]} // cor do da rodinha de refresh
+                        colors={[colors.primary]}  
                     />
                 }
             />
@@ -249,7 +248,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
         color: colors.darkGray,
-        width: 80, // alinha os itens
+        width: 80, 
     },
     menuItemDescription: {
         fontSize: 16,

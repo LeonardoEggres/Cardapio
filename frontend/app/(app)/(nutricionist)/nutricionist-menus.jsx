@@ -5,7 +5,7 @@ import {
     FlatList,
     ActivityIndicator,
     StyleSheet,
-    Pressable, // vamo usar pressable pra todos os botões para poder estilizar e para tentar resolver um bug de botão não mandando a request
+    Pressable,
     Alert,
     Modal,
     TextInput,

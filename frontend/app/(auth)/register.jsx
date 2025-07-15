@@ -7,7 +7,7 @@ import {
   Alert,
   Pressable,
   ActivityIndicator,
-  ScrollView // pra garantir que o formulário não seja cortado em telas menores
+  ScrollView 
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'expo-router';
@@ -28,7 +28,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [role, setRole] = useState('student'); // 'student' como padrão
+  const [role, setRole] = useState('student'); 
   const [loading, setLoading] = useState(false);
 
   const { register } = useAuth();
@@ -49,7 +49,6 @@ export default function Register() {
 
     if (result.success) {
       Alert.alert('Sucesso!', 'Sua conta foi criada com sucesso.');
-      // o redirecionamento automático já deve acontecer pelo AuthContext
     } else {
       Alert.alert('Erro no Cadastro', result.error);
     }

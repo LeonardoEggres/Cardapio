@@ -25,7 +25,7 @@ const colors = {
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false); // estado para o loading
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
 
     const handleLogin = async () => {
@@ -33,12 +33,12 @@ export default function Login() {
             Alert.alert('Erro', 'Por favor, preencha todos os campos.');
             return;
         }
-        setLoading(true); // ativa o loading
+        setLoading(true); 
         const result = await login(email, password);
         if (!result.success) {
             Alert.alert('Erro de Login', result.error);
         }
-        setLoading(false); // desativa o loading
+        setLoading(false);
     };
 
     return (
